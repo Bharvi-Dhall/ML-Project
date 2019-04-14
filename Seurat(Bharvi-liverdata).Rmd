@@ -1,0 +1,76 @@
+---
+  title: "Seurat(B)"
+author: "Bharvi Dhall"
+date: "2/14/2019"
+output: html_document
+---
+  
+  Read the data
+```{r}
+
+# liver
+setwd("~/Data/liver")
+
+load("liver.RData")
+liverM <- as.matrix(liver[,-1])
+rownames(liverM)<- as.character(liver[[1]])
+
+library(Seurat)
+library(dplyr)
+library(Matrix)
+
+#The dgCMatrix class is a class of sparse numeric matrices in the compressed, sparse, column-oriented format. In this implementation the non-zero elements in the columns are sorted into increasing row order. dgCMatrix is the “standard” class for sparse numeric matrices in the Matrix package.
+M1 <- as(liverM, "dgCMatrix")
+class(M1)
+M1[1:6, 1:6]
+
+# 20007 genes and 8444 single cells
+dim(M1)
+
+# summary of total expression per single cell
+summary(colSums(M1))
+
+# check how many genes have at least one transcript in each cell
+at_least_one <- apply(M1, 2, function(x) sum(x>0))
+hist(at_least_one, breaks = 100,
+     main = "Distribution of detected genes",
+     xlab = "Genes with at least one tag")
+
+hist(colSums(M1),
+     breaks = 100, main = "Expression sum per cell",
+     xlab = "Sum expression")
+
+# manually check the number of genes detected in three or more cells
+# a lot of genes are not detected in 3 or more cells
+tmp <- apply(M1, 1, function(x) sum(x>0))
+table(tmp>=3)
+
+
+##The Seurat object is the center of each single cell analysis. It stores all information
+#' associated with the dataset, including data, annotations, analyes, etc
+#create a Seurat Object
+mob <- CreateSeuratObject(raw.data=M1)
+
+#some information on the class
+class(mob)
+slotNames(mob)
+
+
+#View if data is normalized
+hist(colSums(mob@data),
+     breaks = 100,
+     main = "Total expression",
+     xlab = "Sum of expression")
+
+# Performing log-normalisation to normalize data
+lmob <- NormalizeData(object = mob,
+                      normalization.method = "LogNormalize",
+                      scale.factor = 1e4)
+
+#view Data After normalization
+hist(colSums(lmob@data),
+     breaks = 100,
+     main = "Total expression after normalisation",
+     xlab = "Sum of expression")
+
+```

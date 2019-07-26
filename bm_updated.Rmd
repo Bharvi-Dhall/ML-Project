@@ -203,22 +203,22 @@ DimPlot(object=bm, reduction = "tsne",label=TRUE,pt.size=0.5)
 
 #find marker genes in cluster 1
 cluster1.m <- FindMarkers(bm, ident.1 = 1, min.pct = 0.25)
-head(cluster1.markers, n = 5)
+head(cluster1.m, n = 5)
 
 # find all markers distinguishing cluster 5 from clusters 0 and 3
 cluster5.m <- FindMarkers(bm, ident.1 = 5, ident.2 = c(0, 3), min.pct = 0.25)
-head(cluster5.markers, n = 5)
+head(cluster5.m, n = 5)
 
 # find markers for every cluster compared to all remaining cells, report only the positive ones
 #bimod uses LRT
 
 bm.markers <- FindAllMarkers(bm, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25,test.use= "bimod" )
-res2 <- pbmc.markers %>% group_by(cluster) %>% top_n(n = 5, wt = avg_logFC)
+res2 <- bm.markers %>% group_by(cluster) %>% top_n(n = 5, wt = avg_logFC)
 # 105 marker genes found
 
 x<-matrix(res2$gene, ncol=5, byrow=T)
-mydata2<-data.frame(cluster=0:20, genes=matrix(res$gene, ncol=5, byrow=T))
-write.csv(mydata,file="MyData2.csv")
+mydata2<-data.frame(cluster=0:20, genes=matrix(res2$gene, ncol=5, byrow=T))
+write.csv(mydata2,file="MyData2.csv")
 #write.csv on this dataframe. CH
 
 ```
